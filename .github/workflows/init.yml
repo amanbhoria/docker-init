@@ -43,7 +43,7 @@ jobs:
 
       - name: Comment on PR with build number
         if: ${{ success() }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: ""
         with:
           recreate: true
           message: |
