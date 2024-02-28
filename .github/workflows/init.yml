@@ -43,8 +43,26 @@ jobs:
 
       - name: Comment on PR with build number
         if: ${{ success() }}
-        uses: ""
+        uses: actions/github-script@v6
         with:
           recreate: true
+          message: |
+            ${{ steps.vars.outputs.TAG_NAME }} has been pushed.
+
+
+      - name: Comment on PR with build number
+        if: ${{ github.event_name == 'pull_request' && success() }}
+        uses: actions/github-script@v6
+        with:
+          recreate: true
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const message = `The image tag ${process.env.TAG_NAME} has been pushed.`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: message
+            });
           message: |
             ${{ steps.vars.outputs.TAG_NAME }} has been pushed.
