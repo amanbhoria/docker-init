@@ -14,6 +14,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Set vars
+        if: ${{ !env.ACT }}
+        id: vars
+        env:
+          IMAGE_ARN: ${{ steps.meta.outputs.tags }}
+        run: |
+          image_version=$(echo $IMAGE_ARN | cut -d "/" -f 3)
+          echo "TAG_NAME=$image_version" >> $GITHUB_OUTPUT
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
@@ -31,3 +40,11 @@ jobs:
 
       - name: Logout from Docker Hub
         run: docker logout
+
+      - name: Comment on PR with build number
+        if: ${{ success() }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            ${{ steps.vars.outputs.TAG_NAME }} has been pushed.
